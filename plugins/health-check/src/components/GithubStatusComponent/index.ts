@@ -1,0 +1,1 @@
+export { GitHubStatusComponent } from './GithubStatusComponent';
