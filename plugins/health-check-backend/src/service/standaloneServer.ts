@@ -45,7 +45,7 @@ export async function startStandaloneServer(
             metadata: {
               name: 'github-health-endpoint',
               annotations: {
-                'healthCheck/url':
+                'health-check/url':
                   'https://www.githubstatus.com/api/v2/status.json',
               },
             },
@@ -56,7 +56,7 @@ export async function startStandaloneServer(
             metadata: {
               name: 'test-entity',
               annotations: {
-                'healthCheck/url': 'http://localhost:7007/health-check/health',
+                'health-check/url': 'http://localhost:7007/health-check/health',
               },
             },
             apiVersion: 'irrelevant',
