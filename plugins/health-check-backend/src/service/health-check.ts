@@ -12,10 +12,6 @@ export interface HealthCheckResponse {
   error?: string;
 }
 
-function getHealthEndpoint(entity: Entity) {
-  return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
-}
-
 export async function runHealthChecks(
   entities: Entity[],
   logger: Logger,
@@ -29,6 +25,10 @@ export async function runHealthChecks(
   });
 
   return await Promise.all(healthChecks);
+}
+
+function getHealthEndpoint(entity: Entity): string | undefined {
+  return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
 }
 
 /**
