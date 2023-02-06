@@ -5,6 +5,7 @@ import { Logger } from 'winston';
 import { Config } from '@backstage/config';
 import { CatalogClient } from '@backstage/catalog-client';
 import { runHealthChecks } from './health-check';
+import { loadHealthCheckEntities } from './entities-loader';
 
 export interface RouterOptions {
   config: Config;
@@ -23,7 +24,14 @@ export async function createRouter(
 
   router.get('/all', async (_, response) => {
     logger.info('calling health-check/all');
-    const healthCheckResponses = await runHealthChecks(logger, catalogClient);
+    const healthCheckEntities = await loadHealthCheckEntities(
+      catalogClient,
+      logger,
+    );
+    const healthCheckResponses = await runHealthChecks(
+      healthCheckEntities,
+      logger,
+    );
     response.json(healthCheckResponses);
   });
 

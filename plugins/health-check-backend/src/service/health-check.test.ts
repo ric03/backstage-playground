@@ -10,6 +10,8 @@ describe('checkHealth', () => {
   });
 
   describe('with mocked fetch', () => {
+    const dummyUrl = 'https://dummy.url/api/health';
+
     beforeEach(() => {
       jest.resetAllMocks();
       fetchMock.enableMocks();
@@ -28,12 +30,9 @@ describe('checkHealth', () => {
       ].forEach(status => {
         it(`should return true when status is ${status}`, async () => {
           fetchMock.mockResponse('', { status });
-          const result = await checkHealth(
-            'https://dummy.url/api/health',
-            logger,
-          );
+          const result = await checkHealth(dummyUrl, logger);
 
-          expect(result).toBeTruthy();
+          expect(result.isHealthy).toBeTruthy();
         });
       });
     });
@@ -52,43 +51,62 @@ describe('checkHealth', () => {
       ].forEach(status => {
         it(`should return false when status is ${status}`, async () => {
           fetchMock.mockResponse('', { status });
-          const result = await checkHealth(
-            'https://dummy.url/api/health',
-            logger,
-          );
+          const result = await checkHealth(dummyUrl, logger);
 
-          expect(result).toBeFalsy();
+          expect(result.isHealthy).toBeFalsy();
+          expect(result.error).toBeUndefined();
         });
       });
     });
 
     it('should return false when fetch is rejected', async () => {
       fetchMock.mockReject(new Error('rejected'));
-      const result = await checkHealth('https://dummy.url/api/health', logger);
 
-      expect(result).toBeFalsy();
+      const result = await checkHealth(dummyUrl, logger);
+
+      expect(result.isHealthy).toBeFalsy();
+      expect(result.error).toContain(
+        `An error occurred while checking the health of '${dummyUrl}' - Error: rejected`,
+      );
     });
 
     it('should return false when fetch is aborted', async () => {
       fetchMock.mockAbort();
-      const result = await checkHealth('https://dummy.url/api/health', logger);
+      const result = await checkHealth(dummyUrl, logger);
 
-      expect(result).toBeFalsy();
+      expect(result.isHealthy).toBeFalsy();
+      expect(result.error).toContain(
+        `An error occurred while checking the health of '${dummyUrl}' - Error: The operation was aborted.`,
+      );
     });
   });
 
   describe('with invalid parameter', () => {
+    [undefined, ''].forEach(invalidParam => {
+      it(`should return false given param=${invalidParam}`, async () => {
+        const result = await checkHealth(invalidParam, logger);
+
+        expect(result.isHealthy).toBeFalsy();
+        expect(result.error).toContain(
+          `Invalid healthEndpoint (${invalidParam})`,
+        );
+      });
+    });
+  });
+
+  describe('with invalid url', () => {
     [
-      undefined,
-      '',
       'invalid-url',
       'dummy.url/missing-protocol',
       'ftp://dummy.url/invalid-protocol',
-    ].forEach(param => {
-      it(`should return false given param=${param}`, async () => {
-        const result = await checkHealth(param, logger);
+    ].forEach(invalidUrl => {
+      it(`should return false given param=${invalidUrl}`, async () => {
+        const result = await checkHealth(invalidUrl, logger);
 
-        expect(result).toBeFalsy();
+        expect(result.isHealthy).toBeFalsy();
+        expect(result.error).toContain(
+          `An error occurred while checking the health of '${invalidUrl}'`,
+        );
       });
     });
   });

@@ -1,12 +1,15 @@
-import { CatalogClient } from '@backstage/catalog-client';
-import { loadHealthCheckEntities } from './entities-loader';
-import { Entity } from '@backstage/catalog-model';
+import {
+  CompoundEntityRef,
+  Entity,
+  getCompoundEntityRef,
+} from '@backstage/catalog-model';
 import { Logger } from 'winston';
 import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
 
-interface HealthCheckResponse {
-  name: string;
-  isResponseOk: boolean;
+export interface HealthCheckResponse {
+  entityRef: CompoundEntityRef;
+  isHealthy: boolean;
+  error?: string;
 }
 
 function getHealthEndpoint(entity: Entity) {
@@ -14,50 +17,41 @@ function getHealthEndpoint(entity: Entity) {
 }
 
 export async function runHealthChecks(
+  entities: Entity[],
   logger: Logger,
-  catalogClient: CatalogClient,
 ): Promise<HealthCheckResponse[]> {
-  const healthCheckEntities = await loadHealthCheckEntities(catalogClient);
-
-  logger.info(
-    `Found ${healthCheckEntities.items.length} entities annotated with ${HEALTHCHECK_URL_ANNOTATION}`,
-    healthCheckEntities.items, // todo remove this verbose object
-  );
-
-  const healthChecks = healthCheckEntities.items.map(async entity => {
+  const healthChecks = entities.map(async entity => {
+    const entityRef = getCompoundEntityRef(entity);
     const healthEndpoint = getHealthEndpoint(entity);
-    return {
-      name: entity.metadata.name,
-      isResponseOk: await checkHealth(healthEndpoint, logger),
-    };
+    const { isHealthy, error } = await checkHealth(healthEndpoint, logger);
+
+    return { entityRef, isHealthy, error };
   });
+
   return await Promise.all(healthChecks);
 }
 
 /**
  * Check the status of the given healthEndpoint.
  *
- * The endpoint is considered healthy, if the response status is in the range 200 - 299.
- * Otherwise unhealthy, if the endpoint returns a status other than 2xx.
- *
- * @param healthEndpoint
- * @param logger
- * @return true only if response status is 2xx, otherwise false
+ * The endpoint is considered healthy, if the response status is in the range 200 - 299, otherwise unhealthy.
  */
 export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
-): Promise<boolean> {
-  if (!healthEndpoint) return false;
+): Promise<{ isHealthy: boolean; error?: string }> {
+  const unhealthy = (error: string) => ({ isHealthy: false, error });
+
+  if (!healthEndpoint)
+    return unhealthy(`Invalid healthEndpoint (${healthEndpoint})`);
 
   try {
     const response = await fetch(healthEndpoint);
-    return response.ok;
-  } catch (e) {
-    logger.warn(
-      `An error occurred while checking the health of '${healthEndpoint}'`,
-      e,
-    );
-    return false;
+    return { isHealthy: response.ok };
+  } catch (error) {
+    const message = `An error occurred while checking the health of '${healthEndpoint}'`;
+    logger.warn(message, error);
+
+    return unhealthy(`${message} - Error: ${(error as Error).message}`);
   }
 }
