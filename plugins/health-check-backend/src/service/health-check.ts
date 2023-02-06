@@ -2,6 +2,7 @@ import { CatalogClient } from '@backstage/catalog-client';
 import { loadHealthCheckEntities } from './entities-loader';
 import { Entity } from '@backstage/catalog-model';
 import { Logger } from 'winston';
+import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
 
 interface HealthCheckResponse {
   name: string;
@@ -9,7 +10,7 @@ interface HealthCheckResponse {
 }
 
 function getHealthEndpoint(entity: Entity) {
-  return entity.metadata.annotations?.['health-check/url'];
+  return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
 }
 
 export async function runHealthChecks(
@@ -19,7 +20,7 @@ export async function runHealthChecks(
   const healthCheckEntities = await loadHealthCheckEntities(catalogClient);
 
   logger.info(
-    `Found ${healthCheckEntities.items.length} entities annotated with 'health-check/url'`,
+    `Found ${healthCheckEntities.items.length} entities annotated with ${HEALTHCHECK_URL_ANNOTATION}`,
     healthCheckEntities.items, // todo remove this verbose object
   );
 

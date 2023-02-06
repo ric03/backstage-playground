@@ -9,6 +9,7 @@ import {
   GetEntitiesResponse,
 } from '@backstage/catalog-client';
 import { ConfigReader } from '@backstage/config';
+import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
 
 export interface ServerOptions {
   port: number;
@@ -45,7 +46,7 @@ export async function startStandaloneServer(
             metadata: {
               name: 'github-health-endpoint',
               annotations: {
-                'health-check/url':
+                [HEALTHCHECK_URL_ANNOTATION]:
                   'https://www.githubstatus.com/api/v2/status.json',
               },
             },
@@ -56,7 +57,8 @@ export async function startStandaloneServer(
             metadata: {
               name: 'test-entity',
               annotations: {
-                'health-check/url': 'http://localhost:7007/health-check/health',
+                [HEALTHCHECK_URL_ANNOTATION]:
+                  'http://localhost:7007/health-check/health',
               },
             },
             apiVersion: 'irrelevant',

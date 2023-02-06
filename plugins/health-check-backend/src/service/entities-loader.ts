@@ -4,6 +4,7 @@ import {
   EntityFilterQuery,
   GetEntitiesResponse,
 } from '@backstage/catalog-client';
+import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
 
 export async function loadHealthCheckEntities(
   catalogClient: CatalogClient,
@@ -11,7 +12,7 @@ export async function loadHealthCheckEntities(
   const filter: EntityFilterQuery = {
     // kind: 'Component',
     // 'spec.type': 'api',
-    ['health-check/url']: CATALOG_FILTER_EXISTS,
+    [HEALTHCHECK_URL_ANNOTATION]: CATALOG_FILTER_EXISTS,
   };
 
   return await catalogClient.getEntities({
