@@ -33,6 +33,7 @@
     "@backstage/plugin-search-backend-module-pg": "^0.5.1",
     "@backstage/plugin-search-backend-node": "^1.1.1",
     "@backstage/plugin-techdocs-backend": "^1.5.1",
+    "@internal/plugin-health-check-backend": "^0.1.0",
     "app": "link:../app",
     "better-sqlite3": "^8.0.0",
     "dockerode": "^3.3.1",
