@@ -40,6 +40,7 @@ export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
 ): Promise<{ isHealthy: boolean; error?: string }> {
+  const healthy = () => ({ isHealthy: true });
   const unhealthy = (error: string) => ({ isHealthy: false, error });
 
   if (!healthEndpoint)
@@ -47,10 +48,11 @@ export async function checkHealth(
 
   try {
     const response = await fetch(healthEndpoint);
-    return { isHealthy: response.ok };
+    if (!response.ok) return unhealthy(await response.text());
+    return healthy();
   } catch (error) {
     const message = `An error occurred while checking the health of '${healthEndpoint}'`;
-    logger.warn(message, error);
+    logger.error(message, error);
 
     return unhealthy(`${message} - Error: ${(error as Error).message}`);
   }
