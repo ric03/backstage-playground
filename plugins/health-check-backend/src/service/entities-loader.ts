@@ -17,7 +17,8 @@ export async function loadHealthCheckEntities(
   const filter: EntityFilterQuery = {
     // kind: 'Component',
     // 'spec.type': 'api',
-    [HEALTHCHECK_URL_ANNOTATION]: CATALOG_FILTER_EXISTS,
+    [`metadata.annotations.${HEALTHCHECK_URL_ANNOTATION}`]:
+      CATALOG_FILTER_EXISTS,
   };
 
   const response: GetEntitiesResponse = await catalogClient.getEntities({
