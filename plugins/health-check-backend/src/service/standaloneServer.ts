@@ -9,7 +9,7 @@ import {
   GetEntitiesResponse,
 } from '@backstage/catalog-client';
 import { ConfigReader } from '@backstage/config';
-import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
+import { HEALTHCHECK_URL_ANNOTATION } from '@internal/plugin-health-check-common';
 
 export interface ServerOptions {
   port: number;

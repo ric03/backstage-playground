@@ -1,21 +1,16 @@
-import {
-  CompoundEntityRef,
-  Entity,
-  getCompoundEntityRef,
-} from '@backstage/catalog-model';
+import { Entity, getCompoundEntityRef } from '@backstage/catalog-model';
 import { Logger } from 'winston';
-import { HEALTHCHECK_URL_ANNOTATION } from './entity-annotations';
-
-export interface HealthCheckResponse {
-  entityRef: CompoundEntityRef;
-  isHealthy: boolean;
-  error?: string;
-}
+import {
+  HEALTHCHECK_URL_ANNOTATION,
+  HealthCheckResponse,
+} from '@internal/plugin-health-check-common';
 
 export async function runHealthChecks(
   entities: Entity[],
   logger: Logger,
-): Promise<HealthCheckResponse[]> {
+): Promise<HealthCheckResponse> {
+  logger.info('Executing health checks...');
+
   const healthChecks = entities.map(async entity => {
     const entityRef = getCompoundEntityRef(entity);
     const healthEndpoint = getHealthEndpoint(entity);
@@ -24,11 +19,16 @@ export async function runHealthChecks(
     return { entityRef, isHealthy, error };
   });
 
-  return await Promise.all(healthChecks);
+  return { items: await Promise.all(healthChecks) };
 }
 
 function getHealthEndpoint(entity: Entity): string | undefined {
   return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
+}
+
+interface CheckHealthResult {
+  isHealthy: boolean;
+  error?: string;
 }
 
 /**
@@ -39,7 +39,7 @@ function getHealthEndpoint(entity: Entity): string | undefined {
 export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
-): Promise<{ isHealthy: boolean; error?: string }> {
+): Promise<CheckHealthResult> {
   const healthy = () => ({ isHealthy: true });
   const unhealthy = (error: string) => ({ isHealthy: false, error });
 

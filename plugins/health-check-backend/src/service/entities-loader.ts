@@ -1,7 +1,8 @@
 import {CATALOG_FILTER_EXISTS, CatalogClient, EntityFilterQuery, GetEntitiesResponse,} from '@backstage/catalog-client';
-import {HEALTHCHECK_URL_ANNOTATION} from './entity-annotations';
+
 import {Logger} from 'winston';
 import {Entity} from '@backstage/catalog-model';
+import {HEALTHCHECK_URL_ANNOTATION} from '@internal/plugin-health-check-common';
 
 /**
  * Load every entity, that is annotated with `health-check/url`

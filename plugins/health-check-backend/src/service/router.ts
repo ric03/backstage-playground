@@ -23,7 +23,7 @@ export async function createRouter(
   router.use(express.json());
 
   router.get('/all', async (_, response) => {
-    logger.info('calling health-check/all');
+    logger.info('GET health-check/all');
     const healthCheckEntities = await loadHealthCheckEntities(
       catalogClient,
       logger,
