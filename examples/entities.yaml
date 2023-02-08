@@ -59,7 +59,7 @@ kind: Component
 metadata:
   name: health-check-204
   annotations:
-    health-check/url: http://httpstat.us/204?sleep=5000
+    health-check/url: http://httpstat.us/204
 spec:
   type: service
   owner: guests
@@ -71,7 +71,7 @@ kind: Component
 metadata:
   name: health-check-300
   annotations:
-    health-check/url: http://httpstat.us/300?sleep=5000
+    health-check/url: http://httpstat.us/300
 spec:
   type: service
   owner: guests
@@ -83,7 +83,7 @@ kind: Component
 metadata:
   name: health-check-418
   annotations:
-    health-check/url: http://httpstat.us/418?sleep=5000
+    health-check/url: http://httpstat.us/418
 spec:
   type: service
   owner: guests
@@ -95,7 +95,7 @@ kind: Component
 metadata:
   name: health-check-503
   annotations:
-    health-check/url: http://httpstat.us/503?sleep=5000
+    health-check/url: http://httpstat.us/503
 spec:
   type: service
   owner: guests

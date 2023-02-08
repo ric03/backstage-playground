@@ -6,9 +6,8 @@ import {
   Page,
   SupportButton,
 } from '@backstage/core-components';
-import { Grid } from '@material-ui/core';
 import React from 'react';
-import { GitHubStatusComponent } from '../GithubStatusComponent';
+import { HealthChecks } from '../HealthCheckComponent';
 
 export const HealthCheckPage = () => {
   return (
@@ -21,11 +20,7 @@ export const HealthCheckPage = () => {
         <ContentHeader title="Plugin title">
           <SupportButton>A description of your plugin goes here.</SupportButton>
         </ContentHeader>
-        <Grid container spacing={3} direction="column">
-          <Grid item>
-            <GitHubStatusComponent />
-          </Grid>
-        </Grid>
+        <HealthChecks />
       </Content>
     </Page>
   );
