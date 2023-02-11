@@ -96,3 +96,25 @@ spec:
   owner: guests
   lifecycle: experimental
 ---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: health-check-200-sleep-6000
+  annotations:
+    health-check/url: http://httpstat.us/200?sleep=6000
+spec:
+  type: service
+  owner: guests
+  lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: unknown-url
+  annotations:
+    health-check/url: http://unknown.url/health
+spec:
+  type: service
+  owner: guests
+  lifecycle: experimental
+---
