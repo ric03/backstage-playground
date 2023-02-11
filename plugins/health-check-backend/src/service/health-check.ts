@@ -5,7 +5,7 @@ import {
   HealthCheckResponse,
 } from '@internal/plugin-health-check-common';
 
-export async function runHealthChecks(
+export async function executeHealthChecks(
   entities: Entity[],
   logger: Logger,
 ): Promise<HealthCheckResponse> {
@@ -32,6 +32,25 @@ interface CheckHealthResult {
 }
 
 /**
+ * https://dmitripavlutin.com/timeout-fetch-request/
+ */
+async function fetchWithTimeout(
+  healthEndpoint: string,
+  timeoutSeconds: number,
+) {
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(
+    () => abortController.abort(),
+    timeoutSeconds * 1000,
+  );
+  const response = await fetch(healthEndpoint, {
+    signal: abortController.signal,
+  });
+  clearTimeout(timeoutId);
+  return response;
+}
+
+/**
  * Check the status of the given healthEndpoint.
  *
  * The endpoint is considered healthy, if the response status is in the range 200 - 299, otherwise unhealthy.
@@ -39,6 +58,7 @@ interface CheckHealthResult {
 export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
+  timeoutSeconds: number = 5,
 ): Promise<CheckHealthResult> {
   const healthy = () => ({ isHealthy: true });
   const unhealthy = (error: string) => ({ isHealthy: false, error });
@@ -47,11 +67,16 @@ export async function checkHealth(
     return unhealthy(`Invalid healthEndpoint (${healthEndpoint})`);
 
   try {
-    const response = await fetch(healthEndpoint);
+    const response = await fetchWithTimeout(healthEndpoint, timeoutSeconds);
     if (!response.ok) return unhealthy(await response.text());
     return healthy();
   } catch (error) {
-    const message = `An error occurred while checking the health of '${healthEndpoint}'`;
+    let message;
+    if ((error as Error).name === 'AbortError') {
+      message = `Request for ${healthEndpoint} timed out because it took longer than ${timeoutSeconds} seconds to resolve`;
+    } else {
+      message = `An error occurred while checking the health of '${healthEndpoint}'`;
+    }
     logger.error(message, error);
 
     return unhealthy(`${message} - Error: ${(error as Error).message}`);

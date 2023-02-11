@@ -76,7 +76,7 @@ describe('checkHealth', () => {
 
       expect(result.isHealthy).toBeFalsy();
       expect(result.error).toContain(
-        `An error occurred while checking the health of '${dummyUrl}' - Error: The operation was aborted.`,
+        `Request for ${dummyUrl} timed out because it took longer than 5 seconds to resolve`,
       );
     });
   });
