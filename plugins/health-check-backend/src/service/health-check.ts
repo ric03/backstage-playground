@@ -1,7 +1,7 @@
 import { Entity, getCompoundEntityRef } from '@backstage/catalog-model';
 import { Logger } from 'winston';
 import { HealthCheckResponse } from '@internal/plugin-health-check-common';
-import { getHealthEndpoint } from './entities-loader';
+import { getHealthEndpoint } from './entity-loader';
 
 export async function executeHealthChecks(
   entities: Entity[],
@@ -69,9 +69,9 @@ export async function checkHealth(
     if ((error as Error).name === 'AbortError') {
       message = `Request for ${healthEndpoint} timed out because it took longer than ${timeoutSeconds} seconds to resolve`;
     } else {
-      message = `An error occurred while checking the health of '${healthEndpoint}'`;
+      message = `Request for ${healthEndpoint} failed due to unknown reasons'`;
     }
-    logger.error(message, error);
+    logger.info(message);
 
     return unhealthy(`${message} - Error: ${(error as Error).message}`);
   }
