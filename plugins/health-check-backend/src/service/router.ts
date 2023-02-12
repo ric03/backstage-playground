@@ -17,7 +17,11 @@ export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const { logger, config, catalogClient } = options;
-  logger.info('config', config.getOptionalConfig('healthCheck'));
+
+  logger.info(
+    'Creating Router with Config',
+    config.getOptionalConfig('healthCheck'),
+  );
 
   const router = Router();
   router.use(express.json());
