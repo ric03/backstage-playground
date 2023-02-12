@@ -32,3 +32,7 @@ export async function loadHealthCheckEntities(
 
   return response.items;
 }
+
+export function getHealthEndpoint(entity: Entity): string | undefined {
+  return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
+}

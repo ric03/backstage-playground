@@ -1,9 +1,7 @@
 import { Entity, getCompoundEntityRef } from '@backstage/catalog-model';
 import { Logger } from 'winston';
-import {
-  HEALTHCHECK_URL_ANNOTATION,
-  HealthCheckResponse,
-} from '@internal/plugin-health-check-common';
+import { HealthCheckResponse } from '@internal/plugin-health-check-common';
+import { getHealthEndpoint } from './entities-loader';
 
 export async function executeHealthChecks(
   entities: Entity[],
@@ -20,10 +18,6 @@ export async function executeHealthChecks(
   });
 
   return { items: await Promise.all(healthChecks) };
-}
-
-function getHealthEndpoint(entity: Entity): string | undefined {
-  return entity.metadata.annotations?.[HEALTHCHECK_URL_ANNOTATION];
 }
 
 interface CheckHealthResult {
