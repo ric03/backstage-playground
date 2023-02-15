@@ -4,11 +4,15 @@
  * @packageDocumentation
  */
 import { CompoundEntityRef } from '@backstage/catalog-model';
+import { DateTime } from 'luxon';
 
 export interface HealthCheckItem {
+  id?: number;
   entityRef: CompoundEntityRef;
+  url: string;
   isHealthy: boolean;
-  error?: string;
+  errorMessage?: string;
+  timestamp: DateTime;
 }
 
 export interface HealthCheckResponse {

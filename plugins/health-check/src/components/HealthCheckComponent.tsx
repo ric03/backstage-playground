@@ -67,9 +67,9 @@ export function HealthCheckComponent({
         <Grid item md={4}>
           <Typography>{item.isHealthy ? 'Operational' : 'Error'}</Typography>
         </Grid>
-        {item.error && (
+        {item.errorMessage && (
           <Grid item md={12}>
-            <Typography>{item.error}</Typography>
+            <Typography>{item.errorMessage}</Typography>
           </Grid>
         )}
       </Grid>

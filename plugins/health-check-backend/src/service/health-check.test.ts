@@ -5,10 +5,6 @@ import { getVoidLogger } from '@backstage/backend-common';
 describe('checkHealth', () => {
   const logger = getVoidLogger();
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('with mocked fetch', () => {
     const dummyUrl = 'https://dummy.url/api/health';
 
@@ -54,7 +50,7 @@ describe('checkHealth', () => {
           const result = await checkHealth(dummyUrl, logger);
 
           expect(result.isHealthy).toBeFalsy();
-          expect(result.error).toBe(`returning ${status}`);
+          expect(result.errorMessage).toBe(`returning ${status}`);
         });
       });
     });
@@ -65,8 +61,8 @@ describe('checkHealth', () => {
       const result = await checkHealth(dummyUrl, logger);
 
       expect(result.isHealthy).toBeFalsy();
-      expect(result.error).toContain(
-        `An error occurred while checking the health of '${dummyUrl}' - Error: rejected`,
+      expect(result.errorMessage).toContain(
+        `Request for ${dummyUrl} failed - rejected`,
       );
     });
 
@@ -75,7 +71,7 @@ describe('checkHealth', () => {
       const result = await checkHealth(dummyUrl, logger);
 
       expect(result.isHealthy).toBeFalsy();
-      expect(result.error).toContain(
+      expect(result.errorMessage).toContain(
         `Request for ${dummyUrl} timed out because it took longer than 5 seconds to resolve`,
       );
     });
@@ -87,7 +83,7 @@ describe('checkHealth', () => {
         const result = await checkHealth(invalidParam, logger);
 
         expect(result.isHealthy).toBeFalsy();
-        expect(result.error).toContain(
+        expect(result.errorMessage).toContain(
           `Invalid healthEndpoint (${invalidParam})`,
         );
       });
@@ -96,16 +92,25 @@ describe('checkHealth', () => {
 
   describe('with invalid url', () => {
     [
-      'invalid-url',
-      'dummy.url/missing-protocol',
-      'ftp://dummy.url/invalid-protocol',
-    ].forEach(invalidUrl => {
+      {
+        invalidUrl: 'invalid-url',
+        expectedErrorMessage: 'Only absolute URLs are supported',
+      },
+      {
+        invalidUrl: 'dummy.url/missing-protocol',
+        expectedErrorMessage: 'Only absolute URLs are supported',
+      },
+      {
+        invalidUrl: 'ftp://dummy.url/invalid-protocol',
+        expectedErrorMessage: 'Only HTTP(S) protocols are supported',
+      },
+    ].forEach(({ invalidUrl, expectedErrorMessage }) => {
       it(`should return false given param=${invalidUrl}`, async () => {
         const result = await checkHealth(invalidUrl, logger);
 
         expect(result.isHealthy).toBeFalsy();
-        expect(result.error).toContain(
-          `An error occurred while checking the health of '${invalidUrl}'`,
+        expect(result.errorMessage).toContain(
+          `Request for ${invalidUrl} failed - ${expectedErrorMessage}`,
         );
       });
     });
