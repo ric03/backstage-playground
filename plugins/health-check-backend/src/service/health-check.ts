@@ -1,8 +1,12 @@
-import {CompoundEntityRef, Entity, getCompoundEntityRef,} from '@backstage/catalog-model';
-import {Logger} from 'winston';
-import {getHealthEndpoint} from './entity-loader';
-import {DateTime} from 'luxon';
-import {fetchWithTimeout} from './util';
+import {
+  CompoundEntityRef,
+  Entity,
+  getCompoundEntityRef,
+} from '@backstage/catalog-model';
+import { Logger } from 'winston';
+import { getHealthEndpoint } from './entity-loader';
+import { DateTime } from 'luxon';
+import { fetchWithTimeout } from './util';
 
 /**
  * The result of the fetch call

@@ -19,8 +19,8 @@ import {
   UrlReaders,
   useHotMemoize,
 } from '@backstage/backend-common';
-import {TaskScheduler} from '@backstage/backend-tasks';
-import {Config} from '@backstage/config';
+import { TaskScheduler } from '@backstage/backend-tasks';
+import { Config } from '@backstage/config';
 import app from './plugins/app';
 import auth from './plugins/auth';
 import catalog from './plugins/catalog';
@@ -29,9 +29,9 @@ import proxy from './plugins/proxy';
 import techdocs from './plugins/techdocs';
 import search from './plugins/search';
 import healthCheck from './plugins/health-check';
-import {PluginEnvironment} from './types';
-import {ServerPermissionClient} from '@backstage/plugin-permission-node';
-import {DefaultIdentityClient} from '@backstage/plugin-auth-node';
+import { PluginEnvironment } from './types';
+import { ServerPermissionClient } from '@backstage/plugin-permission-node';
+import { DefaultIdentityClient } from '@backstage/plugin-auth-node';
 
 function makeCreateEnv(config: Config) {
   const root = getRootLogger();

@@ -1,8 +1,12 @@
-import {resolvePackagePath} from '@backstage/backend-common';
-import {Knex} from 'knex';
-import {CompoundEntityRef, parseEntityRef, stringifyEntityRef,} from '@backstage/catalog-model';
-import {HealthCheckEntity} from '@internal/plugin-health-check-common';
-import {DateTime} from 'luxon';
+import { resolvePackagePath } from '@backstage/backend-common';
+import { Knex } from 'knex';
+import {
+  CompoundEntityRef,
+  parseEntityRef,
+  stringifyEntityRef,
+} from '@backstage/catalog-model';
+import { HealthCheckEntity } from '@internal/plugin-health-check-common';
+import { DateTime } from 'luxon';
 
 /**
  * the raw database entity model
