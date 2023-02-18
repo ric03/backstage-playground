@@ -1,18 +1,18 @@
 import {resolvePackagePath} from '@backstage/backend-common';
 import {Knex} from 'knex';
 import {CompoundEntityRef, parseEntityRef, stringifyEntityRef,} from '@backstage/catalog-model';
-import {HealthCheckItem} from '@internal/plugin-health-check-common';
+import {HealthCheckEntity} from '@internal/plugin-health-check-common';
 import {DateTime} from 'luxon';
 
 /**
- * the database entity model
+ * the raw database entity model
  * @internal
  */
 interface DbHealthCheckRow {
   id: number;
   entityRef: string;
   url: string;
-  isHealthy: any;
+  isHealthy: boolean;
   errorMessage?: string | null;
   timestamp: Date;
 }
@@ -52,17 +52,17 @@ export class DatabaseHandler {
   ];
 
   /**
-   * Select the healthCheck items for a given entity.
+   * Get the healthCheck items for a given entity.
    *
    * @param entityRef of the entity
    * @param limit the number of elements
    * @param offset to select elements further in the past, defaults to 0
    */
-  async getHealthCheckList(
+  async getHealthCheckEntries(
     entityRef: CompoundEntityRef,
     limit: number,
     offset: number = 0,
-  ): Promise<HealthCheckItem[]> {
+  ): Promise<HealthCheckEntity[]> {
     const queryResult = await this.database<DbHealthCheckRow>(this.tableName)
       .select(...this.healthCheckColumns)
       .where('entityRef', stringifyEntityRef(entityRef))
@@ -78,7 +78,7 @@ export class DatabaseHandler {
    *
    * @param item a healthCheck item
    */
-  async addSingleHealthCheck(item: HealthCheckItem) {
+  async addSingleHealthCheck(item: HealthCheckEntity) {
     const data = this.convertToInsertRow(item);
     await this.database<DbHealthCheckRow>(this.tableName).insert(data);
   }
@@ -88,7 +88,7 @@ export class DatabaseHandler {
    *
    * @param items list of healthCheck items
    */
-  async addMultipleHealthChecks(items: HealthCheckItem[]) {
+  async addMultipleHealthChecks(items: HealthCheckEntity[]) {
     if (items.length === 0) return;
     const data = items.map(this.convertToInsertRow);
     await this.database<DbHealthCheckRow>(this.tableName).insert(data);
@@ -103,7 +103,7 @@ export class DatabaseHandler {
    * @private
    */
   private convertToInsertRow(
-    item: HealthCheckItem,
+    item: HealthCheckEntity,
   ): Omit<DbHealthCheckRow, 'id'> {
     return {
       // the `id` will be generated automatically
@@ -120,7 +120,9 @@ export class DatabaseHandler {
    *
    * @param entity a raw database entity
    */
-  private convertToHealthCheckItem(entity: DbHealthCheckRow): HealthCheckItem {
+  private convertToHealthCheckItem(
+    entity: DbHealthCheckRow,
+  ): HealthCheckEntity {
     return {
       id: Number(entity.id),
       entityRef: parseEntityRef(String(entity.entityRef)),

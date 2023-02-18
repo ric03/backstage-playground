@@ -8,7 +8,7 @@ import { CatalogClient } from '@backstage/catalog-client';
 
 export default async function createPlugin({
   config,
-  database,
+  database: databaseManager,
   logger,
   discovery,
   scheduler,
@@ -17,10 +17,17 @@ export default async function createPlugin({
     discoveryApi: discovery,
   });
 
-  await createScheduler({ catalogClient, config, database, logger, scheduler });
+  await createScheduler({
+    catalogClient,
+    config,
+    databaseManager,
+    logger,
+    scheduler,
+  });
 
   return await createRouter({
     config,
+    databaseManager,
     logger,
     catalogClient,
   });

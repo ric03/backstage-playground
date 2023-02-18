@@ -1,40 +1,68 @@
-import {Entity, getCompoundEntityRef} from '@backstage/catalog-model';
+import {CompoundEntityRef, Entity, getCompoundEntityRef,} from '@backstage/catalog-model';
 import {Logger} from 'winston';
-import {HealthCheckResponse} from '@internal/plugin-health-check-common';
 import {getHealthEndpoint} from './entity-loader';
 import {DateTime} from 'luxon';
+import {fetchWithTimeout} from './util';
 
 /**
  * The result of the fetch call
  * @internal
  */
-interface HealthCheckResult {
+export interface HealthCheckResult {
+  entityRef: CompoundEntityRef;
+  url: string;
+  status: Status;
+  timestamp: DateTime;
+}
+
+interface Status {
   isHealthy: boolean;
   errorMessage?: string;
+}
+
+/**
+ * Create a healthy status
+ */
+function healthy(): Status {
+  return { isHealthy: true };
+}
+
+/**
+ * Create an unhealthy status with an error message
+ * @param errorMessage
+ */
+function unhealthy(errorMessage: string) {
+  return {
+    isHealthy: false,
+    errorMessage,
+  };
 }
 
 export async function executeHealthChecks(
   entities: Entity[],
   logger: Logger,
-): Promise<HealthCheckResponse> {
-  logger.info('Executing health checks...');
+): Promise<HealthCheckResult[]> {
+  const healthChecks = entities.map(entity =>
+    checkHealthOfEntity(entity, logger),
+  );
+  return await Promise.all(healthChecks);
+}
 
-  const healthChecks = entities.map(async entity => {
-    const entityRef = getCompoundEntityRef(entity);
-    const healthEndpoint = getHealthEndpoint(entity);
+async function checkHealthOfEntity(
+  entity: Entity,
+  logger: Logger,
+): Promise<HealthCheckResult> {
+  const entityRef = getCompoundEntityRef(entity);
+  const healthEndpoint = getHealthEndpoint(entity);
 
-    const healthCheckResult = await checkHealth(healthEndpoint, logger);
+  const status = await checkHealth(healthEndpoint, logger);
 
-    return {
-      entityRef: entityRef,
-      url: healthEndpoint,
-      isHealthy: healthCheckResult.isHealthy,
-      errorMessage: healthCheckResult.errorMessage,
-      timestamp: DateTime.now(),
-    };
-  });
-
-  return { items: await Promise.all(healthChecks) };
+  return {
+    entityRef: entityRef,
+    url: healthEndpoint,
+    status: status,
+    timestamp: DateTime.now(),
+  };
 }
 
 /**
@@ -49,13 +77,7 @@ export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
   timeoutSeconds: number = 5,
-): Promise<HealthCheckResult> {
-  const healthy = (): HealthCheckResult => ({ isHealthy: true });
-  const unhealthy = (errorMessage: string) => ({
-    isHealthy: false,
-    errorMessage,
-  });
-
+): Promise<Status> {
   if (!healthEndpoint)
     return unhealthy(`Invalid healthEndpoint (${healthEndpoint})`);
 
@@ -77,33 +99,11 @@ function createErrorMessage(
   error: Error,
   healthEndpoint: string,
   timeoutSeconds: number,
-) {
+): string {
   if (error.name === 'AbortError') {
     return `Request for ${healthEndpoint} timed out because it took longer than ${timeoutSeconds} seconds to resolve`;
   } else if (error.message) {
     return `Request for ${healthEndpoint} failed - ${error.message}`;
   }
   return `Request for ${healthEndpoint} failed`;
-}
-
-/**
- * Fetch an url with a timeout.
- *
- * The default timeout of nodejs is too long (120 secs).
- * https://dmitripavlutin.com/timeout-fetch-request/
- */
-async function fetchWithTimeout(
-  healthEndpoint: string,
-  timeoutSeconds: number,
-) {
-  const abortController = new AbortController();
-  const timeoutId = setTimeout(
-    () => abortController.abort(),
-    timeoutSeconds * 1000,
-  );
-  const response = await fetch(healthEndpoint, {
-    signal: abortController.signal,
-  });
-  clearTimeout(timeoutId);
-  return response;
 }

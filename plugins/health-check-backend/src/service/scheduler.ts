@@ -2,16 +2,17 @@ import { CatalogClient } from '@backstage/catalog-client';
 import { Logger } from 'winston';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
 import { loadHealthCheckEntities } from './entity-loader';
-import { executeHealthChecks } from './health-check';
+import { executeHealthChecks, HealthCheckResult } from './health-check';
 import { Config } from '@backstage/config';
 import { SchedulerConfig } from './schedulerConfig';
 import { PluginDatabaseManager } from '@backstage/backend-common';
 import { DatabaseHandler } from './DatabaseHandler';
+import { HealthCheckEntity } from '@internal/plugin-health-check-common';
 
 interface CreateHealthCheckSchedulerOptions {
   catalogClient: CatalogClient;
   config: Config;
-  database: PluginDatabaseManager;
+  databaseManager: PluginDatabaseManager;
   logger: Logger;
   scheduler: PluginTaskScheduler;
 }
@@ -19,10 +20,12 @@ interface CreateHealthCheckSchedulerOptions {
 export async function createScheduler(
   options: CreateHealthCheckSchedulerOptions,
 ) {
-  const { catalogClient, config, logger, database, scheduler } = options;
+  const { catalogClient, config, logger, databaseManager, scheduler } = options;
 
   const schedulerConfig = SchedulerConfig.fromConfig(config);
-  const db = await DatabaseHandler.create(await database.getClient());
+  const databaseHandler = await DatabaseHandler.create(
+    await databaseManager.getClient(),
+  );
 
   logger.info(
     `Running with Scheduler Config ${JSON.stringify(schedulerConfig)}`,
@@ -34,9 +37,13 @@ export async function createScheduler(
     timeout: schedulerConfig.timeout,
     initialDelay: { seconds: 5 },
     fn: async () => {
-      await runHealthCheckTask(catalogClient, db, logger);
+      logger.info(`Starting to run scheduled task 'health-check'`);
+      await runHealthCheckTask(catalogClient, databaseHandler, logger);
+      logger.info(`Finished scheduled task 'health-check'`);
     },
   });
+
+  // todo add cleanup scheduler, if an entity does not exist anymore
 }
 
 /**
@@ -48,18 +55,18 @@ async function runHealthCheckTask(
   logger: Logger,
 ) {
   const entities = await loadHealthCheckEntities(catalogClient, logger);
-  const healthCheckResponse = await executeHealthChecks(entities, logger);
+  const healthCheckResults = await executeHealthChecks(entities, logger);
 
-  // todo remove logging
-  logger.info(
-    `The healthCheckResponses: ${JSON.stringify(healthCheckResponse)}`,
-  );
-  await db.addMultipleHealthChecks(healthCheckResponse.items);
+  const dbEntities = healthCheckResults.map(toEntity);
+  await db.addMultipleHealthChecks(dbEntities);
+}
 
-  const example = healthCheckResponse.items[4];
-  logger.info(
-    `the db result: ${JSON.stringify(
-      await db.getHealthCheckList(example.entityRef, 99),
-    )}`,
-  );
+function toEntity(result: HealthCheckResult): HealthCheckEntity {
+  return {
+    entityRef: result.entityRef,
+    url: result.url,
+    isHealthy: result.status.isHealthy,
+    errorMessage: result.status.errorMessage,
+    timestamp: result.timestamp,
+  };
 }

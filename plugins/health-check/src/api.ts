@@ -1,8 +1,8 @@
-import { HealthCheckResponse } from '@internal/plugin-health-check-common';
+import { GetAllResponse } from '@internal/plugin-health-check-common';
 import { createApiRef, DiscoveryApi } from '@backstage/core-plugin-api';
 
 export interface HealthCheckApi {
-  runAllHealthChecks(): Promise<HealthCheckResponse>;
+  getAllHealthChecks(): Promise<GetAllResponse>;
 }
 
 export const healthCheckApiRef = createApiRef<HealthCheckApi>({
@@ -10,11 +10,18 @@ export const healthCheckApiRef = createApiRef<HealthCheckApi>({
 });
 
 export class HealthCheckBackendClient implements HealthCheckApi {
+  private baseUrl?: string;
+
   constructor(private discoveryApi: DiscoveryApi) {}
 
-  async runAllHealthChecks(): Promise<HealthCheckResponse> {
-    const url = `${await this.discoveryApi.getBaseUrl('health-check')}/all`;
+  async getAllHealthChecks(): Promise<GetAllResponse> {
+    const url = `${await this.loadBaseUrl()}/all`;
     const response = await fetch(url);
     return await response.json();
+  }
+
+  private async loadBaseUrl() {
+    if (this.baseUrl) return this.baseUrl;
+    return await this.discoveryApi.getBaseUrl('health-check');
   }
 }

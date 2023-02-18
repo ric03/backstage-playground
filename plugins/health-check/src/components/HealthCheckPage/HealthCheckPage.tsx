@@ -7,7 +7,8 @@ import {
   SupportButton,
 } from '@backstage/core-components';
 import React from 'react';
-import { HealthChecks } from '../HealthCheckComponent';
+import { GitHubStatusCard } from '../GithubStatusComponent';
+import { HealthCheckOverview } from './HealthCheckComponent';
 
 export const HealthCheckPage = () => {
   return (
@@ -20,7 +21,8 @@ export const HealthCheckPage = () => {
         <ContentHeader title="Plugin title">
           <SupportButton>A description of your plugin goes here.</SupportButton>
         </ContentHeader>
-        <HealthChecks />
+        <GitHubStatusCard />
+        <HealthCheckOverview />
       </Content>
     </Page>
   );

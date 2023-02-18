@@ -10,6 +10,25 @@ import { InfoCard, Progress } from '@backstage/core-components';
 import Alert from '@material-ui/lab/Alert';
 import React from 'react';
 
+export const GitHubStatusCard = () => (
+  <InfoCard title="Github Status">
+    <GitHubStatus />
+  </InfoCard>
+);
+
+function GitHubStatus() {
+  const { value: gitHubStatus, error, loading } = useAsync(loadGitHubStatus);
+
+  if (loading) {
+    return <Progress />;
+  } else if (error) {
+    return <Alert severity="error">{error.message}</Alert>;
+  }
+  return (
+    <Typography variant="body1">{gitHubStatus?.status.description}</Typography>
+  );
+}
+
 interface GithubStatusResponse {
   page: {
     id: string;
@@ -31,22 +50,3 @@ async function loadGitHubStatus(): Promise<GithubStatusResponse> {
   const data: GithubStatusResponse = await response.json();
   return data;
 }
-
-function GitHubStatus() {
-  const { value: gitHubStatus, error, loading } = useAsync(loadGitHubStatus);
-
-  if (loading) {
-    return <Progress />;
-  } else if (error) {
-    return <Alert severity="error">{error.message}</Alert>;
-  }
-  return (
-    <Typography variant="body1">{gitHubStatus?.status.description}</Typography>
-  );
-}
-
-export const GitHubStatusComponent = () => (
-  <InfoCard title="Github Status">
-    <GitHubStatus />
-  </InfoCard>
-);

@@ -6,7 +6,9 @@
 import { CompoundEntityRef } from '@backstage/catalog-model';
 import { DateTime } from 'luxon';
 
-export interface HealthCheckItem {
+export const HEALTHCHECK_URL_ANNOTATION = 'health-check/url';
+
+export interface HealthCheckEntity {
   id?: number;
   entityRef: CompoundEntityRef;
   url: string;
@@ -15,8 +17,19 @@ export interface HealthCheckItem {
   timestamp: DateTime;
 }
 
-export interface HealthCheckResponse {
-  items: HealthCheckItem[];
+export interface GetAllResponseHistory {
+  url: string;
+  isHealthy: boolean;
+  errorMessage?: string;
+  timestamp: DateTime;
 }
 
-export const HEALTHCHECK_URL_ANNOTATION = 'health-check/url';
+export interface GetAllResponseEntityInfo {
+  entityRef: CompoundEntityRef;
+  status: { isHealthy: boolean };
+  history: GetAllResponseHistory[];
+}
+
+export interface GetAllResponse {
+  entities: GetAllResponseEntityInfo[];
+}

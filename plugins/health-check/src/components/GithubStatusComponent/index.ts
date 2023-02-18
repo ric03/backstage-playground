@@ -1,1 +1,1 @@
-export { GitHubStatusComponent } from './GithubStatusComponent';
+export { GitHubStatusCard } from './GitHubStatusCard';
