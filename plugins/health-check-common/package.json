@@ -30,6 +30,7 @@
     "dist"
   ],
   "dependencies": {
-    "@backstage/catalog-model": "^1.1.5"
+    "@backstage/catalog-model": "^1.1.5",
+    "luxon": "^3.2.1"
   }
 }
