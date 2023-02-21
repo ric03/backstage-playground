@@ -1,3 +1,5 @@
+import { Duration } from 'luxon';
+
 /**
  * Fetch an url with a timeout.
  *
@@ -6,12 +8,12 @@
  */
 export async function fetchWithTimeout(
   healthEndpoint: string,
-  timeoutSeconds: number,
+  timeout: Duration,
 ) {
   const abortController = new AbortController();
   const timeoutId = setTimeout(
     () => abortController.abort(),
-    timeoutSeconds * 1000,
+    timeout.toMillis(),
   );
   const response = await fetch(healthEndpoint, {
     signal: abortController.signal,

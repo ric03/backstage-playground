@@ -5,7 +5,7 @@ import {
 } from '@backstage/catalog-model';
 import { Logger } from 'winston';
 import { getHealthEndpoint } from './entity-loader';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { fetchWithTimeout } from './util';
 
 /**
@@ -44,22 +44,24 @@ function unhealthy(errorMessage: string) {
 
 export async function executeHealthChecks(
   entities: Entity[],
+  requestTimeout: Duration,
   logger: Logger,
 ): Promise<HealthCheckResult[]> {
   const healthChecks = entities.map(entity =>
-    checkHealthOfEntity(entity, logger),
+    checkHealthOfEntity(entity, requestTimeout, logger),
   );
   return await Promise.all(healthChecks);
 }
 
 async function checkHealthOfEntity(
   entity: Entity,
+  requestTimeout: Duration,
   logger: Logger,
 ): Promise<HealthCheckResult> {
   const entityRef = getCompoundEntityRef(entity);
   const healthEndpoint = getHealthEndpoint(entity);
 
-  const status = await checkHealth(healthEndpoint, logger);
+  const status = await checkHealth(healthEndpoint, logger, requestTimeout);
 
   return {
     entityRef: entityRef,
@@ -80,7 +82,7 @@ async function checkHealthOfEntity(
 export async function checkHealth(
   healthEndpoint: string | undefined,
   logger: Logger,
-  timeoutSeconds: number = 5,
+  timeoutSeconds: Duration = Duration.fromObject({ seconds: 5 }),
 ): Promise<Status> {
   if (!healthEndpoint)
     return unhealthy(`Invalid healthEndpoint (${healthEndpoint})`);
@@ -102,10 +104,10 @@ export async function checkHealth(
 function createErrorMessage(
   error: Error,
   healthEndpoint: string,
-  timeoutSeconds: number,
+  timeout: Duration,
 ): string {
   if (error.name === 'AbortError') {
-    return `Request for ${healthEndpoint} timed out because it took longer than ${timeoutSeconds} seconds to resolve`;
+    return `Request for ${healthEndpoint} timed out because it took longer than ${timeout.toHuman()} to resolve`;
   } else if (error.message) {
     return `Request for ${healthEndpoint} failed - ${error.message}`;
   }

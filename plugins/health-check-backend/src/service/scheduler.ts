@@ -8,6 +8,8 @@ import { SchedulerConfig } from './schedulerConfig';
 import { PluginDatabaseManager } from '@backstage/backend-common';
 import { DatabaseHandler } from './DatabaseHandler';
 import { HealthCheckEntity } from '@internal/plugin-health-check-common';
+import { Duration } from 'luxon';
+import { HumanDuration } from '@backstage/types';
 
 interface CreateHealthCheckSchedulerOptions {
   catalogClient: CatalogClient;
@@ -31,6 +33,8 @@ export async function createScheduler(
     `Running with Scheduler Config ${JSON.stringify(schedulerConfig)}`,
   );
 
+  const timeoutAsDuration = getOrConvertToDuration(schedulerConfig.timeout);
+
   await scheduler.scheduleTask({
     id: 'health-check',
     frequency: schedulerConfig.schedule,
@@ -38,7 +42,12 @@ export async function createScheduler(
     initialDelay: schedulerConfig.initialDelay,
     fn: async () => {
       logger.info(`Starting to run scheduled task 'health-check'`);
-      await runHealthCheckTask(catalogClient, databaseHandler, logger);
+      await runHealthCheckTask(
+        catalogClient,
+        databaseHandler,
+        timeoutAsDuration,
+        logger,
+      );
       logger.info(`Finished scheduled task 'health-check'`);
     },
   });
@@ -52,13 +61,27 @@ export async function createScheduler(
 async function runHealthCheckTask(
   catalogClient: CatalogClient,
   db: DatabaseHandler,
+  requestTimeout: Duration,
   logger: Logger,
 ) {
   const entities = await loadHealthCheckEntities(catalogClient, logger);
-  const healthCheckResults = await executeHealthChecks(entities, logger);
+  const healthCheckResults = await executeHealthChecks(
+    entities,
+    requestTimeout,
+    logger,
+  );
 
   const dbEntities = healthCheckResults.map(toEntity);
   await db.addMultipleHealthChecks(dbEntities);
+}
+
+function getOrConvertToDuration(
+  durationLike: Duration | HumanDuration,
+): Duration {
+  if (Duration.isDuration(durationLike)) {
+    return durationLike;
+  }
+  return Duration.fromDurationLike(durationLike);
 }
 
 function toEntity(result: HealthCheckResult): HealthCheckEntity {
