@@ -45,16 +45,17 @@ export async function createRouter(
       catalogClient,
       logger,
     );
+    // todo pass limit via queryparam
+    const unresolvedDatabaseRequests: Promise<HealthCheckEntity[]>[] =
+      healthCheckEntities
+        .map(getCompoundEntityRef)
+        .map(entityRef => database.getHealthCheckEntries(entityRef, 100));
 
-    const items: Promise<HealthCheckEntity[]>[] = healthCheckEntities
-      .map(getCompoundEntityRef)
-      .map(
-        async entityRef => await database.getHealthCheckEntries(entityRef, 25),
-      )
-      .filter(async list => (await list).length > 0);
-
-    const collectedHealthChecks = await Promise.all(items);
-    const data: GetAllResponse = toGetAllResponse(collectedHealthChecks);
+    const collectedHealthChecks = await Promise.all(unresolvedDatabaseRequests);
+    const nonEmptyHealthChecks = collectedHealthChecks.filter(
+      i => i.length > 0,
+    );
+    const data: GetAllResponse = toGetAllResponse(nonEmptyHealthChecks);
     response.json(data);
   });
 
