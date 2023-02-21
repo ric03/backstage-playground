@@ -35,7 +35,7 @@ export async function createScheduler(
     id: 'health-check',
     frequency: schedulerConfig.schedule,
     timeout: schedulerConfig.timeout,
-    initialDelay: { seconds: 5 },
+    initialDelay: schedulerConfig.initialDelay,
     fn: async () => {
       logger.info(`Starting to run scheduled task 'health-check'`);
       await runHealthCheckTask(catalogClient, databaseHandler, logger);
