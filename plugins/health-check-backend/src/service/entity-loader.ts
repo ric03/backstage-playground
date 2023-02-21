@@ -31,7 +31,7 @@ export async function loadHealthCheckEntities(
     filter: [filter],
   });
 
-  logger.info(
+  logger.debug(
     `Found ${response.items.length} entities annotated with ${HEALTHCHECK_URL_ANNOTATION}`,
   );
 
