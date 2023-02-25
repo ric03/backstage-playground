@@ -5,13 +5,12 @@ import { Logger } from 'winston';
 import { Config } from '@backstage/config';
 import { CatalogClient } from '@backstage/catalog-client';
 import { loadHealthCheckEntities } from './entity-loader';
-import { DatabaseHandler } from './DatabaseHandler';
+import { DatabaseHandler, HealthCheckEntity } from './DatabaseHandler';
 import { getCompoundEntityRef } from '@backstage/catalog-model';
 import {
   GetAllResponse,
   GetAllResponseEntityHistory,
   GetAllResponseEntityInfo,
-  HealthCheckEntity,
 } from '@internal/plugin-health-check-common';
 import { notEmpty } from './util';
 

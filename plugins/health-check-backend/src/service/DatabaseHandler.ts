@@ -5,7 +5,6 @@ import {
   parseEntityRef,
   stringifyEntityRef,
 } from '@backstage/catalog-model';
-import { HealthCheckEntity } from '@internal/plugin-health-check-common';
 import { DateTime } from 'luxon';
 
 /**
@@ -19,6 +18,21 @@ interface DbHealthCheckRow {
   isHealthy: boolean;
   errorMessage?: string | null;
   timestamp: Date;
+}
+
+/**
+ * Database entity
+ */
+export interface HealthCheckEntity {
+  /**
+   * unique id of the database entity, automatically generated
+   */
+  id?: number;
+  entityRef: CompoundEntityRef;
+  url: string;
+  isHealthy: boolean;
+  errorMessage?: string;
+  timestamp: DateTime;
 }
 
 export class DatabaseHandler {

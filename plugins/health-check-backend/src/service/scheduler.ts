@@ -6,8 +6,7 @@ import { executeHealthChecks, HealthCheckResult } from './health-check';
 import { Config } from '@backstage/config';
 import { SchedulerConfig } from './schedulerConfig';
 import { PluginDatabaseManager } from '@backstage/backend-common';
-import { DatabaseHandler } from './DatabaseHandler';
-import { HealthCheckEntity } from '@internal/plugin-health-check-common';
+import { DatabaseHandler, HealthCheckEntity } from './DatabaseHandler';
 import { Duration } from 'luxon';
 import { HumanDuration } from '@backstage/types';
 
