@@ -1,4 +1,7 @@
-import { GetAllResponse } from '@internal/plugin-health-check-common';
+import {
+  GetAllResponse,
+  unmarshallGetAllResponse,
+} from '@internal/plugin-health-check-common';
 import { createApiRef, DiscoveryApi } from '@backstage/core-plugin-api';
 
 export interface HealthCheckApi {
@@ -17,7 +20,8 @@ export class HealthCheckBackendClient implements HealthCheckApi {
   async getAllHealthChecks(): Promise<GetAllResponse> {
     const url = `${await this.loadBaseUrl()}/all`;
     const response = await fetch(url);
-    return await response.json();
+    const rawJson = await response.json();
+    return unmarshallGetAllResponse(rawJson);
   }
 
   private async loadBaseUrl() {
