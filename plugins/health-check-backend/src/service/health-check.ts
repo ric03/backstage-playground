@@ -35,7 +35,7 @@ function healthy(): Status {
  * Create an unhealthy status with an error message
  * @param errorMessage
  */
-function unhealthy(errorMessage: string) {
+function unhealthy(errorMessage: string): Status {
   return {
     isHealthy: false,
     errorMessage,
