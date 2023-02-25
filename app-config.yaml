@@ -102,3 +102,12 @@ catalog:
     #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
     #   rules:
     #     - allow: [User, Group]
+
+# Custom health-check Plugin
+healthCheck:
+  schedule:
+    seconds: 60
+  timout:
+    seconds: 5
+  initialDelay:
+    seconds: 13
