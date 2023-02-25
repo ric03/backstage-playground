@@ -13,6 +13,7 @@ import {
   GetAllResponseEntityInfo,
   HealthCheckEntity,
 } from '@internal/plugin-health-check-common';
+import { notEmpty } from './util';
 
 export interface RouterOptions {
   config: Config;
@@ -52,9 +53,7 @@ export async function createRouter(
         .map(entityRef => database.getHealthChecks(entityRef, 100));
 
     const collectedHealthChecks = await Promise.all(unresolvedDatabaseRequests);
-    const nonEmptyHealthChecks = collectedHealthChecks.filter(
-      i => i.length > 0,
-    );
+    const nonEmptyHealthChecks = collectedHealthChecks.filter(notEmpty);
     const data: GetAllResponse = toGetAllResponse(nonEmptyHealthChecks);
     response.json(data);
   });
