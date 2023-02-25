@@ -8,7 +8,13 @@ import { DateTime } from 'luxon';
 
 export const HEALTHCHECK_URL_ANNOTATION = 'health-check/url';
 
+/**
+ * Database entity
+ */
 export interface HealthCheckEntity {
+  /**
+   * unique id of the database entity, automatically generated
+   */
   id?: number;
   entityRef: CompoundEntityRef;
   url: string;
@@ -17,7 +23,7 @@ export interface HealthCheckEntity {
   timestamp: DateTime;
 }
 
-export interface GetAllResponseHistory {
+export interface GetAllResponseEntityHistory {
   url: string;
   isHealthy: boolean;
   errorMessage?: string;
@@ -27,7 +33,7 @@ export interface GetAllResponseHistory {
 export interface GetAllResponseEntityInfo {
   entityRef: CompoundEntityRef;
   status: { isHealthy: boolean };
-  history: GetAllResponseHistory[];
+  history: GetAllResponseEntityHistory[];
 }
 
 export interface GetAllResponse {

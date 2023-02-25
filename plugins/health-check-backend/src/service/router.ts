@@ -9,8 +9,8 @@ import { DatabaseHandler } from './DatabaseHandler';
 import { getCompoundEntityRef } from '@backstage/catalog-model';
 import {
   GetAllResponse,
+  GetAllResponseEntityHistory,
   GetAllResponseEntityInfo,
-  GetAllResponseHistory,
   HealthCheckEntity,
 } from '@internal/plugin-health-check-common';
 
@@ -81,7 +81,7 @@ function toEntityInfo(entities: HealthCheckEntity[]): GetAllResponseEntityInfo {
   };
 }
 
-function toHistory(entity: HealthCheckEntity): GetAllResponseHistory {
+function toHistory(entity: HealthCheckEntity): GetAllResponseEntityHistory {
   return {
     url: entity.url,
     isHealthy: entity.isHealthy,

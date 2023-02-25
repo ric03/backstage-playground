@@ -3,8 +3,8 @@ import { InfoCard, Progress } from '@backstage/core-components';
 import { Grid, Typography } from '@material-ui/core';
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
 import {
+  GetAllResponseEntityHistory,
   GetAllResponseEntityInfo,
-  GetAllResponseHistory,
 } from '@internal/plugin-health-check-common';
 import { useApi } from '@backstage/core-plugin-api';
 import { healthCheckApiRef } from '../../api';
@@ -70,7 +70,7 @@ function HealthCheckCard({ data }: HealthCheckCardOptions) {
 }
 
 interface HistoryBarsOptions {
-  history: GetAllResponseHistory[];
+  history: GetAllResponseEntityHistory[];
 }
 
 function HistoryBars({ history }: HistoryBarsOptions) {
@@ -81,7 +81,7 @@ function HistoryBars({ history }: HistoryBarsOptions) {
 }
 
 interface HistorySingleBarOptions {
-  historyItem: GetAllResponseHistory;
+  historyItem: GetAllResponseEntityHistory;
 }
 
 function HistorySingleBar({ historyItem }: HistorySingleBarOptions) {
