@@ -19,27 +19,28 @@ export interface HealthCheckResult {
   timestamp: DateTime;
 }
 
+type milliseconds = number;
+
 interface Status {
   isHealthy: boolean;
   errorMessage?: string;
+  responseTime?: milliseconds;
 }
 
 /**
- * Create a healthy status
+ * Create a healthy status with a responseTime
  */
-function healthy(): Status {
-  return { isHealthy: true };
+function healthy(responseTime: milliseconds): Status {
+  return { isHealthy: true, responseTime };
 }
 
 /**
- * Create an unhealthy status with an error message
+ * Create an unhealthy status with an error message and an optional responseTime
  * @param errorMessage
+ * @param responseTime optional
  */
-function unhealthy(errorMessage: string): Status {
-  return {
-    isHealthy: false,
-    errorMessage,
-  };
+function unhealthy(errorMessage: string, responseTime?: milliseconds): Status {
+  return { isHealthy: false, errorMessage, responseTime };
 }
 
 export async function executeHealthChecks(
@@ -88,8 +89,15 @@ export async function checkHealth(
     return unhealthy(`Invalid healthEndpoint (${healthEndpoint})`);
 
   try {
+    const start = performance.now();
     const response = await fetchWithTimeout(healthEndpoint, timeoutSeconds);
-    return response.ok ? healthy() : unhealthy(await response.text());
+    const end = performance.now();
+
+    const responseTime = Math.round(end - start);
+
+    return response.ok
+      ? healthy(responseTime)
+      : unhealthy(await response.text(), responseTime);
   } catch (error) {
     const errorMessage = createErrorMessage(
       error as Error,
