@@ -53,6 +53,7 @@ export async function createRouter(
         .map(entityRef => database.getHealthChecks(entityRef, 100));
 
     const collectedHealthChecks = await Promise.all(unresolvedDatabaseRequests);
+    // in case of a cold start or newly added, the entities may not have been probed
     const nonEmptyHealthChecks = collectedHealthChecks.filter(notEmpty);
     const data: GetAllResponse = toGetAllResponse(nonEmptyHealthChecks);
     response.json(data);
