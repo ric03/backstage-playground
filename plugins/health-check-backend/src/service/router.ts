@@ -77,11 +77,13 @@ function toEntityInfo(entities: HealthCheckEntity[]): GetAllResponseEntityInfo {
   return {
     entityRef: entities[0].entityRef,
     status: { isHealthy: entities[0].isHealthy },
-    history: entities.map(toHistory),
+    history: entities.map(toEntityHistory),
   };
 }
 
-function toHistory(entity: HealthCheckEntity): GetAllResponseEntityHistory {
+function toEntityHistory(
+  entity: HealthCheckEntity,
+): GetAllResponseEntityHistory {
   return {
     url: entity.url,
     isHealthy: entity.isHealthy,
