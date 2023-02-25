@@ -56,13 +56,13 @@ export class DatabaseHandler {
   ];
 
   /**
-   * Get the healthCheck items for a given entity.
+   * Get the healthChecks for a given entity.
    *
    * @param entityRef of the entity
    * @param limit the number of elements
    * @param offset to select elements further in the past, defaults to 0
    */
-  async getHealthCheckEntries(
+  async getHealthChecks(
     entityRef: CompoundEntityRef,
     limit: number,
     offset: number = 0,

@@ -49,7 +49,7 @@ export async function createRouter(
     const unresolvedDatabaseRequests: Promise<HealthCheckEntity[]>[] =
       healthCheckEntities
         .map(getCompoundEntityRef)
-        .map(entityRef => database.getHealthCheckEntries(entityRef, 100));
+        .map(entityRef => database.getHealthChecks(entityRef, 100));
 
     const collectedHealthChecks = await Promise.all(unresolvedDatabaseRequests);
     const nonEmptyHealthChecks = collectedHealthChecks.filter(
