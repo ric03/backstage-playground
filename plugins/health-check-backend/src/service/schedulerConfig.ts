@@ -7,22 +7,22 @@ type Timeout = Duration | HumanDuration;
 type InitialDelay = Duration | HumanDuration | undefined;
 
 export class SchedulerConfig {
-  private static readonly DEFAULT_SCHEDULE: Schedule = { seconds: 10 };
+  private static readonly DEFAULT_SCHEDULE: Schedule = { seconds: 60 };
   private static readonly DEFAULT_TIMEOUT: Timeout = { seconds: 5 };
   private static readonly DEFAULT_INITIAL_DELAY: InitialDelay = { seconds: 15 };
 
   static fromConfig(config: Config) {
-    const healthCheck = config.getOptionalConfig('health-check');
+    const healthCheck = config.getOptionalConfig('healthCheck');
 
-    const optionalSchedule = healthCheck?.getOptionalConfig('schedule');
-    const schedule = (optionalSchedule ?? this.DEFAULT_SCHEDULE) as Schedule;
+    const optionalSchedule = healthCheck?.getOptional<Schedule>('schedule');
+    const schedule = optionalSchedule ?? this.DEFAULT_SCHEDULE;
 
-    const optionalTimeout = healthCheck?.getOptionalConfig('timeout');
-    const timeout = (optionalTimeout ?? this.DEFAULT_TIMEOUT) as Timeout;
+    const optionalTimeout = healthCheck?.getOptional<Timeout>('timeout');
+    const timeout = optionalTimeout ?? this.DEFAULT_TIMEOUT;
 
-    const optionalInitialDelay = healthCheck?.getOptionalConfig('initialDelay');
-    const initialDelay = (optionalInitialDelay ??
-      this.DEFAULT_INITIAL_DELAY) as InitialDelay;
+    const optionalInitialDelay =
+      healthCheck?.getOptional<InitialDelay>('initialDelay');
+    const initialDelay = optionalInitialDelay ?? this.DEFAULT_INITIAL_DELAY;
 
     return new SchedulerConfig(schedule, timeout, initialDelay);
   }
