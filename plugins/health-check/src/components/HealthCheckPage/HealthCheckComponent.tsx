@@ -1,6 +1,6 @@
 import React from 'react';
 import { InfoCard, Progress } from '@backstage/core-components';
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Tooltip, Typography } from '@material-ui/core';
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
 import {
   GetAllResponseEntityHistory,
@@ -11,6 +11,7 @@ import { healthCheckApiRef } from '../../api';
 import { useAsync } from 'react-use';
 import Alert from '@material-ui/lab/Alert';
 import { stringifyEntityRef } from '@backstage/catalog-model';
+import { DateTime } from 'luxon';
 
 const greenColor = '#3BA55C';
 const redColor = '#ed4245';
@@ -74,8 +75,8 @@ interface HistoryBarsOptions {
 }
 
 function HistoryBars({ history }: HistoryBarsOptions) {
-  const bars = history.map((h, index) => (
-    <HistorySingleBar key={index} historyItem={h} />
+  const bars = history.map(it => (
+    <HistorySingleBar key={it.timestamp.toString()} historyItem={it} />
   ));
   return <React.Fragment>{bars}</React.Fragment>;
 }
@@ -86,14 +87,27 @@ interface HistorySingleBarOptions {
 
 function HistorySingleBar({ historyItem }: HistorySingleBarOptions) {
   return (
-    <div
-      style={{
-        display: 'inline-flex',
-        backgroundColor: historyItem.isHealthy ? greenColor : redColor,
-        width: '0.25rem',
-        height: '1.75rem',
-        marginRight: '0.25rem',
-      }}
-    />
+    <Tooltip
+      title={
+        <React.Fragment>
+          <Typography style={{ fontWeight: 'bold' }}>
+            {historyItem.timestamp.toLocaleString(DateTime.DATETIME_SHORT)}
+          </Typography>
+          <Typography>{historyItem.errorMessage}</Typography>
+        </React.Fragment>
+      }
+    >
+      <div
+        style={{
+          display: 'inline-flex',
+          backgroundColor: historyItem.isHealthy ? greenColor : redColor,
+          width: '0.25rem',
+          height: '1.75rem',
+          marginRight: '0.25rem',
+          cursor: 'pointer',
+          borderRadius: '5px',
+        }}
+      />
+    </Tooltip>
   );
 }
