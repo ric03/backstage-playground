@@ -23,6 +23,7 @@ exports.up = async function up(knex) {
       .timestamp('timestamp')
       .notNullable()
       .comment('Timestamp when health was checked');
+    table.smallint('responseTime').comment('The responseTime in milliseconds');
   });
 };
 

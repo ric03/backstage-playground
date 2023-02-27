@@ -88,5 +88,6 @@ function toEntityHistory(
     isHealthy: entity.isHealthy,
     errorMessage: entity.errorMessage,
     timestamp: entity.timestamp,
+    responseTime: entity.responseTime,
   };
 }

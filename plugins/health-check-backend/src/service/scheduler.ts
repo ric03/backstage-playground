@@ -54,6 +54,15 @@ export async function createScheduler(
   // todo add cleanup scheduler, if an entity does not exist anymore
 }
 
+function getOrConvertToDuration(
+  durationLike: Duration | HumanDuration,
+): Duration {
+  if (Duration.isDuration(durationLike)) {
+    return durationLike;
+  }
+  return Duration.fromDurationLike(durationLike);
+}
+
 /**
  * Run the healthChecks
  */
@@ -74,15 +83,6 @@ async function runHealthCheckTask(
   await db.addMultipleHealthChecks(dbEntities);
 }
 
-function getOrConvertToDuration(
-  durationLike: Duration | HumanDuration,
-): Duration {
-  if (Duration.isDuration(durationLike)) {
-    return durationLike;
-  }
-  return Duration.fromDurationLike(durationLike);
-}
-
 function toEntity(result: HealthCheckResult): HealthCheckEntity {
   return {
     entityRef: result.entityRef,
@@ -90,5 +90,6 @@ function toEntity(result: HealthCheckResult): HealthCheckEntity {
     isHealthy: result.status.isHealthy,
     errorMessage: result.status.errorMessage,
     timestamp: result.timestamp,
+    responseTime: result.status.responseTime,
   };
 }

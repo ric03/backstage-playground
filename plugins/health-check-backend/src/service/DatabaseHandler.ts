@@ -18,6 +18,7 @@ interface DbHealthCheckRow {
   isHealthy: boolean;
   errorMessage?: string | null;
   timestamp: Date;
+  responseTime?: number;
 }
 
 /**
@@ -33,6 +34,7 @@ export interface HealthCheckEntity {
   isHealthy: boolean;
   errorMessage?: string;
   timestamp: DateTime;
+  responseTime?: number;
 }
 
 export class DatabaseHandler {
@@ -67,6 +69,7 @@ export class DatabaseHandler {
     'isHealthy',
     'errorMessage',
     'timestamp',
+    'responseTime',
   ];
 
   /**
@@ -130,6 +133,7 @@ export class DatabaseHandler {
       isHealthy: item.isHealthy,
       errorMessage: item.errorMessage,
       timestamp: item.timestamp.toJSDate(),
+      responseTime: item.responseTime,
     };
   }
 
@@ -149,6 +153,7 @@ export class DatabaseHandler {
       errorMessage:
         entity.errorMessage === null ? undefined : String(entity.errorMessage),
       timestamp: DateTime.fromJSDate(new Date(entity.timestamp)),
+      responseTime: Number(entity.responseTime),
     };
   }
 }

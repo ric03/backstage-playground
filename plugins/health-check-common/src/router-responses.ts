@@ -6,11 +6,14 @@
 import { CompoundEntityRef } from '@backstage/catalog-model';
 import { DateTime } from 'luxon';
 
+export type milliseconds = number;
+
 export interface GetAllResponseEntityHistory {
   url: string;
   isHealthy: boolean;
   errorMessage?: string;
   timestamp: DateTime;
+  responseTime?: milliseconds;
 }
 
 export interface GetAllResponseEntityInfo {
@@ -32,6 +35,7 @@ interface GetAllResponseEntityHistoryRaw {
   errorMessage?: string;
   // timestamp: transferred as a raw string with ISO-Format
   timestamp: string;
+  responseTime?: milliseconds;
 }
 
 /**

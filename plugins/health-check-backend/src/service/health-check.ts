@@ -7,6 +7,7 @@ import { Logger } from 'winston';
 import { getHealthEndpoint } from './entity-loader';
 import { DateTime, Duration } from 'luxon';
 import { fetchWithTimeout } from './util';
+import { milliseconds } from '@internal/plugin-health-check-common';
 
 /**
  * The result of the fetch call
@@ -18,8 +19,6 @@ export interface HealthCheckResult {
   status: Status;
   timestamp: DateTime;
 }
-
-type milliseconds = number;
 
 interface Status {
   isHealthy: boolean;
