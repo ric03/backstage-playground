@@ -24,13 +24,13 @@
     "postpack": "backstage-cli package postpack"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.1"
+    "@backstage/cli": "^0.22.3"
   },
   "files": [
     "dist"
   ],
   "dependencies": {
-    "@backstage/catalog-model": "^1.1.5",
+    "@backstage/catalog-model": "^1.2.0",
     "luxon": "^3.2.1"
   }
 }
