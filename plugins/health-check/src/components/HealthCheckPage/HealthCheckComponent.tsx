@@ -1,20 +1,20 @@
 import React from 'react';
-import { InfoCard, Progress } from '@backstage/core-components';
-import { Grid, Tooltip, Typography } from '@material-ui/core';
-import { EntityRefLink } from '@backstage/plugin-catalog-react';
 import {
-  GetAllResponseEntityHistory,
-  GetAllResponseEntityInfo,
-} from '@internal/plugin-health-check-common';
+  InfoCard,
+  Link,
+  Progress,
+  StatusError,
+  StatusOK,
+} from '@backstage/core-components';
+import { Grid, Typography } from '@material-ui/core';
+import { EntityRefLink } from '@backstage/plugin-catalog-react';
+import { GetAllResponseEntityInfo } from '@internal/plugin-health-check-common';
 import { useApi } from '@backstage/core-plugin-api';
 import { healthCheckApiRef } from '../../api';
 import { useAsync } from 'react-use';
 import Alert from '@material-ui/lab/Alert';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { DateTime } from 'luxon';
-
-const greenColor = '#3BA55C';
-const redColor = '#ed4245';
+import { ResponseTimingLineChart } from './ResponseTimingLineChart';
 
 export function HealthCheckOverview() {
   const healthCheckApi = useApi(healthCheckApiRef);
@@ -39,75 +39,45 @@ export function HealthCheckOverview() {
   );
 }
 
+interface StatusIndicatorOptions {
+  isHealthy: boolean;
+}
+function StatusIndicator({ isHealthy }: StatusIndicatorOptions) {
+  if (isHealthy) {
+    return <StatusOK />;
+  }
+  return <StatusError />;
+}
+
 interface HealthCheckCardOptions {
   data: GetAllResponseEntityInfo;
 }
-
 function HealthCheckCard({ data }: HealthCheckCardOptions) {
   return (
     <InfoCard>
       <Grid container>
-        <Grid item xs={4}>
-          <EntityRefLink
-            entityRef={data.entityRef}
-            title={data.entityRef.name}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <Grid container justifyContent="flex-end">
-            <HistoryBars history={data.history} />
+        <Grid item xs={4} lg={3}>
+          <Grid container>
+            <Grid item xs={1}>
+              <StatusIndicator isHealthy={data.status.isHealthy} />
+            </Grid>
+            <Grid item xs={11}>
+              <Typography variant="h6">
+                <EntityRefLink
+                  entityRef={data.entityRef}
+                  title={data.entityRef.name}
+                />
+              </Typography>
+              <Typography variant="body2">
+                <Link to={data.history[0].url}>{data.history[0].url}</Link>
+              </Typography>
+            </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={2}>
-          {data.status.isHealthy ? (
-            <Typography style={{ color: greenColor }}> Up </Typography>
-          ) : (
-            <Typography style={{ color: redColor }}>Down</Typography>
-          )}
+        <Grid item xs={8} lg={9}>
+          <ResponseTimingLineChart arr={data.history} />
         </Grid>
       </Grid>
     </InfoCard>
-  );
-}
-
-interface HistoryBarsOptions {
-  history: GetAllResponseEntityHistory[];
-}
-
-function HistoryBars({ history }: HistoryBarsOptions) {
-  const bars = history.map(it => (
-    <HistorySingleBar key={it.timestamp.toString()} historyItem={it} />
-  ));
-  return <React.Fragment>{bars}</React.Fragment>;
-}
-
-interface HistorySingleBarOptions {
-  historyItem: GetAllResponseEntityHistory;
-}
-
-function HistorySingleBar({ historyItem }: HistorySingleBarOptions) {
-  return (
-    <Tooltip
-      title={
-        <React.Fragment>
-          <Typography style={{ fontWeight: 'bold' }}>
-            {historyItem.timestamp.toLocaleString(DateTime.DATETIME_SHORT)}
-          </Typography>
-          <Typography>{historyItem.errorMessage}</Typography>
-        </React.Fragment>
-      }
-    >
-      <div
-        style={{
-          display: 'inline-flex',
-          backgroundColor: historyItem.isHealthy ? greenColor : redColor,
-          width: '0.25rem',
-          height: '1.75rem',
-          marginRight: '0.25rem',
-          cursor: 'pointer',
-          borderRadius: '5px',
-        }}
-      />
-    </Tooltip>
   );
 }
