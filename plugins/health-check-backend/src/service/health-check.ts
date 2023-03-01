@@ -23,7 +23,7 @@ export interface HealthCheckResult {
 interface Status {
   isHealthy: boolean;
   errorMessage?: string;
-  responseTime?: milliseconds;
+  responseTime: milliseconds;
 }
 
 /**
@@ -38,7 +38,10 @@ function healthy(responseTime: milliseconds): Status {
  * @param errorMessage
  * @param responseTime optional
  */
-function unhealthy(errorMessage: string, responseTime?: milliseconds): Status {
+function unhealthy(
+  errorMessage: string,
+  responseTime: milliseconds = 0,
+): Status {
   return { isHealthy: false, errorMessage, responseTime };
 }
 

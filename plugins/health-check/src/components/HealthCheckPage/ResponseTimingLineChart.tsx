@@ -8,18 +8,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { GetAllResponseEntityHistory } from '@internal/plugin-health-check-common';
 import { DateTime } from 'luxon';
+import { ResponseTime } from '@internal/plugin-health-check-common';
 
 interface Options {
-  arr: GetAllResponseEntityHistory[];
+  data: ResponseTime[];
 }
-export function ResponseTimingLineChart({ arr }: Options) {
-  const data = arr.map(it => ({
-    timestamp: it.timestamp.toMillis(),
-    responseTime: it.responseTime,
-  }));
-
+export function ResponseTimingLineChart({ data }: Options) {
   const tickFormatter = (millis: number) =>
     DateTime.fromMillis(millis).toFormat('HH:mm');
 

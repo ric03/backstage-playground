@@ -6,6 +6,7 @@ import {
   stringifyEntityRef,
 } from '@backstage/catalog-model';
 import { DateTime } from 'luxon';
+import { milliseconds } from '@internal/plugin-health-check-common';
 
 /**
  * the raw database entity model
@@ -18,7 +19,7 @@ interface DbHealthCheckRow {
   isHealthy: boolean;
   errorMessage?: string | null;
   timestamp: Date;
-  responseTime?: number;
+  responseTime: number;
 }
 
 /**
@@ -34,7 +35,7 @@ export interface HealthCheckEntity {
   isHealthy: boolean;
   errorMessage?: string;
   timestamp: DateTime;
-  responseTime?: number;
+  responseTime: milliseconds;
 }
 
 export class DatabaseHandler {

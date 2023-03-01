@@ -8,9 +8,10 @@ import { loadHealthCheckEntities } from './entity-loader';
 import { DatabaseHandler, HealthCheckEntity } from './DatabaseHandler';
 import { getCompoundEntityRef } from '@backstage/catalog-model';
 import {
+  EntityInfo,
   GetAllResponse,
-  GetAllResponseEntityHistory,
-  GetAllResponseEntityInfo,
+  ResponseTime,
+  Status,
 } from '@internal/plugin-health-check-common';
 import { notEmpty } from './util';
 
@@ -52,9 +53,7 @@ export async function createRouter(
         .map(entityRef => database.getHealthChecks(entityRef, 100));
 
     const collectedHealthChecks = await Promise.all(unresolvedDatabaseRequests);
-    // in case of a cold start or newly added, the entities may not have been probed
-    const nonEmptyHealthChecks = collectedHealthChecks.filter(notEmpty);
-    const data: GetAllResponse = toGetAllResponse(nonEmptyHealthChecks);
+    const data: GetAllResponse = toGetAllResponse(collectedHealthChecks);
     response.json(data);
   });
 
@@ -66,28 +65,41 @@ export async function createRouter(
   return router;
 }
 
+/**
+ * Map the database entities into a response dto.
+ * In case of a cold start or newly added, the entities may not have been probed, thus filtering them out.
+ *
+ * @param entities
+ */
 function toGetAllResponse(entities: HealthCheckEntity[][]): GetAllResponse {
   return {
-    entities: entities.map(toEntityInfo),
+    entities: entities.filter(notEmpty).map(toEntityInfo),
   };
 }
 
-function toEntityInfo(entities: HealthCheckEntity[]): GetAllResponseEntityInfo {
+function toEntityInfo(entities: HealthCheckEntity[]): EntityInfo {
+  const latestCheck = entities[0];
   return {
-    entityRef: entities[0].entityRef,
-    status: { isHealthy: entities[0].isHealthy },
+    entityRef: latestCheck.entityRef,
+    url: latestCheck.url,
+    status: toStatus(latestCheck.isHealthy, latestCheck.responseTime ?? 0),
     history: entities.map(toEntityHistory),
   };
 }
 
-function toEntityHistory(
-  entity: HealthCheckEntity,
-): GetAllResponseEntityHistory {
+function toStatus(isHealthy: boolean, responseTime: number): Status {
+  if (isHealthy) {
+    if (responseTime >= 0 && responseTime < 400) {
+      return Status.UP;
+    }
+    return Status.DEGRADED;
+  }
+  return Status.DOWN;
+}
+
+function toEntityHistory(entity: HealthCheckEntity): ResponseTime {
   return {
-    url: entity.url,
-    isHealthy: entity.isHealthy,
-    errorMessage: entity.errorMessage,
-    timestamp: entity.timestamp,
-    responseTime: entity.responseTime,
+    timestamp: entity.timestamp.toMillis(),
+    responseTime: entity.responseTime ?? 0,
   };
 }

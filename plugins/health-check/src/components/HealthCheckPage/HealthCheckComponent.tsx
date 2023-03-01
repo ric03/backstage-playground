@@ -5,10 +5,11 @@ import {
   Progress,
   StatusError,
   StatusOK,
+  StatusWarning,
 } from '@backstage/core-components';
 import { Grid, Typography } from '@material-ui/core';
 import { EntityRefLink } from '@backstage/plugin-catalog-react';
-import { GetAllResponseEntityInfo } from '@internal/plugin-health-check-common';
+import { EntityInfo, Status } from '@internal/plugin-health-check-common';
 import { useApi } from '@backstage/core-plugin-api';
 import { healthCheckApiRef } from '../../api';
 import { useAsync } from 'react-use';
@@ -40,17 +41,22 @@ export function HealthCheckOverview() {
 }
 
 interface StatusIndicatorOptions {
-  isHealthy: boolean;
+  status: Status;
 }
-function StatusIndicator({ isHealthy }: StatusIndicatorOptions) {
-  if (isHealthy) {
-    return <StatusOK />;
+function StatusIndicator({ status }: StatusIndicatorOptions) {
+  switch (status) {
+    case Status.UP:
+      return <StatusOK />;
+    case Status.DEGRADED:
+      return <StatusWarning />;
+    case Status.DOWN:
+    default:
+      return <StatusError />;
   }
-  return <StatusError />;
 }
 
 interface HealthCheckCardOptions {
-  data: GetAllResponseEntityInfo;
+  data: EntityInfo;
 }
 function HealthCheckCard({ data }: HealthCheckCardOptions) {
   return (
@@ -59,7 +65,7 @@ function HealthCheckCard({ data }: HealthCheckCardOptions) {
         <Grid item xs={4} lg={3}>
           <Grid container>
             <Grid item xs={1}>
-              <StatusIndicator isHealthy={data.status.isHealthy} />
+              <StatusIndicator status={data.status} />
             </Grid>
             <Grid item xs={11}>
               <Typography variant="h6">
@@ -69,13 +75,13 @@ function HealthCheckCard({ data }: HealthCheckCardOptions) {
                 />
               </Typography>
               <Typography variant="body2">
-                <Link to={data.history[0].url}>{data.history[0].url}</Link>
+                <Link to={data.url}>{data.url}</Link>
               </Typography>
             </Grid>
           </Grid>
         </Grid>
         <Grid item xs={8} lg={9}>
-          <ResponseTimingLineChart arr={data.history} />
+          <ResponseTimingLineChart data={data.history} />
         </Grid>
       </Grid>
     </InfoCard>
