@@ -1,32 +1,15 @@
-import {
-  Content,
-  ContentHeader,
-  Header,
-  HeaderLabel,
-  Page,
-  SupportButton,
-} from '@backstage/core-components';
+import { Header, Page } from '@backstage/core-components';
 import React from 'react';
-import { GitHubStatusCard } from '../GithubStatusComponent';
-import { HealthCheckOverview } from './HealthCheckComponent';
+import { HealthCheckTabLayout } from './HealthCheckTabLayout';
 
 export const HealthCheckPage = () => {
   return (
     <Page themeId="tool">
       <Header
-        title="Welcome to health-check!"
+        title="Down Detector"
         subtitle="Here you can see the uptime of our services"
-      >
-        <HeaderLabel label="Owner" value="Team X" />
-        <HeaderLabel label="Lifecycle" value="Alpha" />
-      </Header>
-      <Content>
-        <ContentHeader title="List of health checks">
-          <SupportButton>A description of your plugin goes here.</SupportButton>
-        </ContentHeader>
-        <GitHubStatusCard />
-        <HealthCheckOverview />
-      </Content>
+      />
+      <HealthCheckTabLayout />
     </Page>
   );
 };
